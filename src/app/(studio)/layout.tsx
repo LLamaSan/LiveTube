@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import { StudioLayout } from "@/modules/studio/ui/layouts/studio-layout";
 
 interface LayoutProps{
@@ -8,6 +9,7 @@ interface LayoutProps{
 const Layout = ({ children }: LayoutProps) => {
   return (
     <StudioLayout>
+      <Toaster />
       { children }
     </StudioLayout>
   );

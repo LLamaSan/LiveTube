@@ -52,3 +52,10 @@ export const studioRouter = createTRPCRouter({
         }
     }),
 });
+
+/*
+    Studio Router: 
+    Task: Display/ Load videos on studio page.
+    Is is protected procedure.
+    The route is accessible only if we are within studio route.
+*/

@@ -1,14 +1,46 @@
 "use client";
 
+import { trpc } from "@/trpc/client";
 import { Button } from "@/components/ui/button"
 
-import { PlusIcon } from "lucide-react"
+import { Loader2Icon, PlusIcon } from "lucide-react"
+import { toast } from "sonner";
+import { ResponsiveModal } from "@/components/responsive-modal";
+import { StudioUploader } from "./studio-uploader";
 
 export const StudioUploadModal = () => {
+    const utils = trpc.useUtils();  
+    const create = trpc.videos.create.useMutation({
+        onSuccess: () => {
+            toast.success("Video created");
+            utils.studio.getMany.invalidate();
+        },
+        onError: () => {
+            toast.error("Something went wrong"); 
+        }
+    });
     return (
-        <Button variant="secondary">
-            <PlusIcon />
+        <>
+        <ResponsiveModal
+            title="Upload a video"
+            open={!!create.data?.url}
+            onOpenChange = {() => create.reset( )}
+        >
+            {create.data?.url 
+                ? <StudioUploader endpoint={create.data.url} onSuccess={ () => {} } /> 
+                : <Loader2Icon />
+            }
+        </ResponsiveModal>
+        <Button variant="secondary" onClick={() => create.mutate()} disabled={create.isPending}>
+            {create.isPending ? <Loader2Icon className="animate-spin"/> : <PlusIcon />}
             Create
         </Button>
+        </>
     );
 };
+
+/*
+    19-01-2026
+    Makes it so that now, on clicking Create+ button within studio modal, we can get a video created, a database entry for a video 
+    But we seem to be needing to refresh everytime to see the newly created entry.
+ */
