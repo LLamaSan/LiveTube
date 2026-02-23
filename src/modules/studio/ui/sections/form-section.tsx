@@ -45,6 +45,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/constants";
 import { ThumbnailUploadModal } from "../components/thumbnail-upload-modal";
+import { ThumbnailGenerateModal } from "../components/thumbnail-generate-modal";
 
 export const FormSection = ({ videoId }: FormSectionProps) => {
     return (
@@ -65,6 +66,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     const utils = trpc.useUtils();
 
     const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
+    const [thumbnailGenerateModalOpen, setThumbnailGenerateModalOpen] = useState(false);
 
     const [video] = trpc.studio.getOne.useSuspenseQuery({ id: videoId });
     const [categories] = trpc.categories.getMany.useSuspenseQuery();
@@ -89,6 +91,14 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
             toast.error("Something went wrong");
         },
     });
+    const generateDescription = trpc.videos.generateDescription.useMutation({
+        onSuccess: () => {
+            toast.success("Background job started", { description: "This may take some time"});
+        },
+        onError: () => {
+            toast.error("Something went wrong");
+        },
+    });
 
     const generateTitle = trpc.videos.generateTitle.useMutation({
         onSuccess: () => {
@@ -99,14 +109,6 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
         },
     });
 
-    const generateThumbnail = trpc.videos.generateThumbnail.useMutation({
-        onSuccess: () => {
-            toast.success("Background job started", { description: "This may take some time"});
-        },
-        onError: () => {
-            toast.error("Something went wrong");
-        },
-    });
 
     const restoreThumbnail = trpc.videos.restoreThumbnail.useMutation({
         onSuccess: () => {
@@ -131,7 +133,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
 
     // TODO: Change if deploying outside of Vercel
 
-    const fullUrl = `${process.env.VERCEL_URL || "http://localhost:3000"}/videos/${video.id}`;
+    const fullUrl = `${process.env.VERCEL_URL || "http://localhost:3000"}/videos/${videoId}`;
     const [isCopied, setIsCopied] = useState(false);
 
     const onCopy = async () => {
@@ -148,6 +150,11 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
     */
     return (
         <>
+        <ThumbnailGenerateModal 
+            open={thumbnailGenerateModalOpen}
+            onOpenChange={setThumbnailGenerateModalOpen}
+            videoId={videoId}
+        />
         <ThumbnailUploadModal 
             open={thumbnailModalOpen}
             onOpenChange={setThumbnailModalOpen}
@@ -195,7 +202,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                                         type="button"
                                         className="rounded-full size-6 [&-svg]:size-3"
                                         onClick={() => generateTitle.mutate({ id: videoId })}
-                                        disabled={generateTitle.isPending}
+                                        disabled={generateTitle.isPending || !video.muxTrackId}
                                     >
                                         {generateTitle.isPending
                                             ? <Loader2Icon className="animate-spin" />
@@ -227,10 +234,10 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                                         variant="outline"
                                         type="button"
                                         className="rounded-full size-6 [&-svg]:size-3"
-                                        onClick={() => generateTitle.mutate({ id: videoId })}
-                                        disabled={generateTitle.isPending}
+                                        onClick={() => generateDescription.mutate({ id: videoId })}
+                                        disabled={generateDescription.isPending || !video.muxTrackId}
                                     >
-                                        {generateTitle.isPending
+                                        {generateDescription.isPending
                                             ? <Loader2Icon className="animate-spin" />
                                             : <SparklesIcon />
                                         }
@@ -281,7 +288,7 @@ const FormSectionSuspense = ({ videoId }: FormSectionProps) => {
                                                 Change
                                             </DropdownMenuItem>
                                              <DropdownMenuItem 
-                                                onClick={() => generateThumbnail.mutate({ id: videoId })}
+                                                onClick={() => setThumbnailGenerateModalOpen(true)}
                                              >
                                                 <SparklesIcon className="size-4 mr-1 "/>
                                                 AI-generated

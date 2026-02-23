@@ -10,6 +10,10 @@ interface VideoPlayerProps {
     onPlay?: () => void;    //count views after video plays
 };
 
+export const VideoPlayerSkeleton = () => {
+    return <div className="aspect-video bg-black rounded-xl" />
+};
+
 export const VideoPlayer = ({ 
     playbackId, 
     thumbnailUrl,
