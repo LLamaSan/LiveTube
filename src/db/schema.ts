@@ -148,7 +148,15 @@ export const commentRelations = relations(comments, ({ one, many }) => ({
         fields: [comments.videoId],
         references: [videos.id],
     }),
+    parent: one(comments, {
+        fields: [comments.parentId],
+        references: [comments.id],
+        relationName: "comments_parent_id_fkey",
+    }),
     reactions: many(commentReactions),
+    replies: many(comments, {
+        relationName: "comments_parent_id_fkey",
+    }),
 }));
 
 export const commentInsertSchema = createInsertSchema(comments);

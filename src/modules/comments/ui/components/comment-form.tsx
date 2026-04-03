@@ -13,12 +13,18 @@ import z from "zod";
 
 interface CommentFormProps {
     videoId: string;
+    parentId?: string;
     onSuccess?:  () => void;
+    onCancel?: () => void;
+    variant?: "comment" | "reply",
 };
 
 export const CommentForm = ({
     videoId,
     onSuccess,
+    parentId,
+    onCancel,
+    variant = "comment",
 }: CommentFormProps) => {
     const { user } = useUser();
     const clerk = useClerk();
@@ -27,6 +33,7 @@ export const CommentForm = ({
     const create = trpc.comments.create.useMutation({
         onSuccess: () => {
             utils.comments.getMany.invalidate({ videoId });
+            utils.comments.getMany.invalidate({ videoId, parentId });
             form.reset();
             toast.success("Comment added!"); 
             onSuccess?.();
@@ -45,6 +52,7 @@ export const CommentForm = ({
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+        parentId: parentId,
         videoId,
         value: "",
         },
@@ -54,6 +62,12 @@ export const CommentForm = ({
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         create.mutate(values);
     }
+
+    const handleCancel = () => {
+        form.reset();
+        onCancel?.();
+    };
+
     return (
         <Form {...form}>
         <form 
@@ -75,7 +89,11 @@ export const CommentForm = ({
                             <FormControl>
                                 <Textarea
                                 {...field}
-                                placeholder="Add a comment..."
+                                placeholder = {
+                                variant === "reply" 
+                                ? "Reply to this comment..."
+                                : "Add a comment..." 
+                                }
                                 className="resize-none bg-transparent overflow-hidden min-h-0"
                                 />
                             </FormControl>
@@ -85,12 +103,17 @@ export const CommentForm = ({
                     />
             </div>
             <div className="justify-end mt-2 gap-2 flex">
+                {onCancel && (
+                    <Button variant="ghost" type="button" onClick={handleCancel}>
+                        cancel
+                    </Button>
+                )}
                 <Button 
                     disabled={create.isPending}
                     type="submit"
                     size="sm"
                 >
-                    Comment 
+                    {variant === "reply" ? "Reply" : "Comment"}
                 </Button>
             </div>
             </div>

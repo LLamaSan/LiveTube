@@ -12,10 +12,71 @@ import { mux } from "@/lib/mux";
 import { workflow } from "@/lib/workflow";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, eq, getTableColumns, inArray, isNotNull } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, inArray, isNotNull, lt, or } from "drizzle-orm";
 import { UTApi } from "uploadthing/server";
 import z from 'zod';
 export const videosRouter = createTRPCRouter({
+    getMany: baseProcedure
+        .input(
+            z.object({
+                categoryId: z.string().uuid().nullish(),
+                cursor: z.object({
+                    id: z.string().uuid(),
+                    updatedAt: z.date(),
+                })
+                .nullish(),
+                limit: z.number().min(1).max(100),
+            }),
+        )
+        .query( async ({ input }) => {
+            const { cursor, limit, categoryId } = input;
+            const data = await db
+                .select({
+                    ...getTableColumns(videos),
+                    user: users,
+                    viewCount: db.$count(videoViews, eq(videoViews.videoId, videos.id)),
+                    likeCount: db.$count(videoReactions, and(
+                        eq(videoReactions.videoId, videos.id),
+                        eq(videoReactions.type, "like"),
+                    )),
+                    dislikeCount: db.$count(videoReactions, and(
+                        eq(videoReactions.videoId, videos.id),
+                        eq(videoReactions.type, "dislike"),
+                    )),
+                })
+                .from(videos)
+                .innerJoin(users, eq(videos.userId, users.id))
+                .where(and(
+                    eq(videos.visibility, "public"),
+                    categoryId ? eq(videos.categoryId, categoryId) : undefined,
+                    cursor 
+                    ? or(
+                        lt(videos.updatedAt, cursor.updatedAt),
+                            and(
+                                eq(videos.updatedAt, cursor.updatedAt),
+                                lt(videos.id, cursor.id)
+                            )
+                        )
+                    : undefined,
+                )).orderBy(desc(videos.updatedAt), desc(videos.id))
+                  .limit (limit + 1)        // No longer need clerkId, since it has a database ID
+            
+            const hasMore = data.length > limit;
+            // Remove the last item if there is more data.
+            const items = hasMore ? data.slice(0, -1) : data;
+            //Set the next cursor to the last item if there is more data.
+            const lastItem = items[items.length - 1];
+            const nextCursor = hasMore ? {
+                id: lastItem.id,
+                updatedAt: lastItem.updatedAt, 
+            }
+            : null;
+    
+            return {
+                items, 
+                nextCursor,
+            }
+        }),
     getOne: baseProcedure
         .input(z.object({
             id:z.string().uuid()
@@ -130,6 +191,63 @@ export const videosRouter = createTRPCRouter({
                 body: { userId, videoId: input.id, prompt: input.prompt},
             });
             return workflowRunId;
+        }),
+    revalidate: protectedProcedure
+        .input(z.object({
+            id: z.string().uuid()
+        }))
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId } = ctx.user;
+
+            const [existingVideo] = await db 
+            .select()
+            .from(videos)
+            .where(and(
+                eq(videos.id, input.id),
+                eq(videos.userId, userId),
+            ));
+
+            if(!existingVideo) {
+                throw new TRPCError({ code: "NOT_FOUND" });
+            }
+
+            if (!existingVideo.muxUploadId) {
+                throw new TRPCError({ code: "BAD_REQUEST" });
+            }
+
+            const directUpload = await mux.video.uploads.retrieve(
+                existingVideo.muxUploadId
+            )
+
+            if (!directUpload || !directUpload.asset_id) {
+                throw new TRPCError({ code: "BAD_REQUEST" });
+            }
+
+            const asset = await mux.video.assets.retrieve(
+                directUpload.asset_id
+            )
+
+            if (!asset) {
+                throw new TRPCError({ code: "BAD_REQUEST" });
+            }
+            const playbackId = asset.playback_ids?.[0].id;
+            const duration = asset.duration ? Math.round(asset.duration * 1000) : 0;
+
+            // TODO: Potentially find a way to revalidate trackId and trackStatus as well.
+
+            const [updatedVideo] = await db
+                .update(videos)
+                .set({
+                    muxStatus: asset.status,
+                    muxPlaybackId: playbackId,
+                    muxAssetId: asset.id,
+                    duration,
+                })
+                .where(and(
+                    eq(videos.id, input.id),
+                    eq(videos.userId, userId),
+                ))
+                .returning();
         }),
     restoreThumbnail: protectedProcedure
         .input(z.object({

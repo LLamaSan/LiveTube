@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 interface InfiniteScrollProps {
     isManual?: boolean;
     hasNextPage: boolean;
-    isFetchingNextpage: boolean;
+    isFetchingNextPage: boolean;
     fetchNextPage: () => void;
 };
 
 export const InfiniteScroll = ({
     isManual = false,
     hasNextPage,
-    isFetchingNextpage,
+    isFetchingNextPage,
     fetchNextPage,
 }: InfiniteScrollProps) => {
     const { targetRef, isIntersecting } = useIntersectionObserver({
@@ -21,19 +21,19 @@ export const InfiniteScroll = ({
     });
 
     useEffect  (() => {
-        if(isIntersecting && hasNextPage && !isFetchingNextpage && !isManual) {
+        if(isIntersecting && hasNextPage && !isFetchingNextPage && !isManual) {
             fetchNextPage();
         }
-    }, [isIntersecting, hasNextPage, isFetchingNextpage, isManual, fetchNextPage]);
+    }, [isIntersecting, hasNextPage, isFetchingNextPage, isManual, fetchNextPage]);
     return (
         <div className="flex flex-col items-center gap-5 p-4">
             <div ref={targetRef} className="h-1" />
             {hasNextPage ? (
                 <Button
                     variant="secondary"
-                    disabled={!hasNextPage || isFetchingNextpage}
+                    disabled={!hasNextPage || isFetchingNextPage}
                     onClick = {() => fetchNextPage}>
-                    {isFetchingNextpage ? "Loading...": "Load more"} 
+                    {isFetchingNextPage ? "Loading...": "Load more"} 
                 </Button>
             ) : (
                 <p className="text-xs text-muted-foreground">
