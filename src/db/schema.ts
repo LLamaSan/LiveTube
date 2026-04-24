@@ -13,7 +13,6 @@ export const reactionType = pgEnum("reaction_type", ["like", "dislike"]);
 export const playlistVideos = pgTable("playlist_videos", {
     playlistId: uuid("playlist_id").references(() => playlists.id, {onDelete: "cascade" }).notNull(),
     videoId: uuid("video_id").references(() => videos.id, {onDelete: "cascade" }).notNull(),
-    position: integer("position").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => [
@@ -57,7 +56,8 @@ export const users = pgTable("users",{
     id: uuid("id").primaryKey().defaultRandom(),
     clerkId: text("clerk_id").unique().notNull(),
     name: text("name").notNull(),
-    //TODO: Add banner fields.
+    bannerUrl: text("banner_url"),
+    bannerKey: text("banner_key"),
     imageUrl: text("image_url").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),

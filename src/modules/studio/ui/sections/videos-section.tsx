@@ -145,13 +145,13 @@ const VideosSectionSuspense = () => {                                        // 
                                         {format(new Date(video.createdAt), "d MMM yyyy")}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        views
+                                        {video.viewCount}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        comments
+                                        {video.commentCount}
                                     </TableCell>
                                     <TableCell className="text-right pr-6">
-                                        likes
+                                        {video.likeCount}
                                     </TableCell>
                                 </TableRow>
                             </Link>
@@ -161,7 +161,7 @@ const VideosSectionSuspense = () => {                                        // 
             </div>  
             <InfiniteScroll 
                 hasNextPage = {query.hasNextPage}
-                isFetchingNextpage={query.isFetchingNextPage}
+                isFetchingNextPage={query.isFetchingNextPage}
                 fetchNextPage={query.fetchNextPage}
             />                        
         </div>

@@ -5,6 +5,7 @@ import { HistoryVideosSection } from "../sections/history-videos-section";
 import { PlusIcon } from "lucide-react";
 import { PlaylistCreateModal } from "../components/playlist-create-modal";
 import { useState } from "react";
+import { PlaylistsSection } from "../sections/playlists-section";
 
 export const PlaylistsView = () => {
     const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -29,6 +30,7 @@ export const PlaylistsView = () => {
                         <PlusIcon />
                     </Button>
                 </div>
+                <PlaylistsSection  />
         </div>
     )
 }
