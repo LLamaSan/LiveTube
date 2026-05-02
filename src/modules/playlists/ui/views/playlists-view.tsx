@@ -1,7 +1,6 @@
 "use client"; 
 
 import { Button } from "@/components/ui/button";
-import { HistoryVideosSection } from "../sections/history-videos-section";
 import { PlusIcon } from "lucide-react";
 import { PlaylistCreateModal } from "../components/playlist-create-modal";
 import { useState } from "react";

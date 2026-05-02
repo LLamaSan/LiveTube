@@ -1,7 +1,6 @@
 import { db } from "@/db";
 import { comments, users, videoReactions, videos, videoViews } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { Data } from "@mux/mux-node/resources/index.mjs";
 import { TRPCError } from "@trpc/server";
 import { eq, and, or, lt, desc, getTableColumns } from "drizzle-orm";
 import z from 'zod';

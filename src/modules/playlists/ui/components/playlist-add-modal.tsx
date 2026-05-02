@@ -1,7 +1,4 @@
 import { ResponsiveModal } from "@/components/responsive-modal";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import z from "zod";
 import { trpc } from "@/trpc/client";
 import { DEFAULT_LIMIT } from "@/constants";
 import { Loader2Icon, SquareCheckIcon, SquareIcon } from "lucide-react";

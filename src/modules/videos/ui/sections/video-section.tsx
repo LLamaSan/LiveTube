@@ -2,7 +2,6 @@
 
 import { cn } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
-import { TRPCClientError } from "@trpc/client";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { VideoPlayer, VideoPlayerSkeleton } from "../components/video-player";

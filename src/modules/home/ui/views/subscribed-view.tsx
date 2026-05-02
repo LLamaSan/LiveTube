@@ -1,10 +1,9 @@
 
-import { HomeVideosSection } from "../sections/home-videos-section";
 import { SubscribedVideosSection } from "../sections/subscribed-videos-section";
 
-interface HomeViewProps {
-   categoryId?: string; 
-};
+// interface HomeViewProps {
+//    categoryId?: string; 
+// };
 
 export const SubscribedView = () => {
     return (

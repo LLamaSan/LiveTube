@@ -2,7 +2,6 @@ import { cn } from "@/lib/utils";
 import { THUMBNAIL_FALLBACK } from "@/modules/videos/constants";
 import { ListVideoIcon, PlayIcon } from "lucide-react";
 import Image from "next/image";
-import { PlaylistInfo } from "./playlist-info";
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 

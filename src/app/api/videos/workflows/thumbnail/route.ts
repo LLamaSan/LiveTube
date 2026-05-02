@@ -33,16 +33,17 @@ export const { POST } = serve(async (context) => {
 
   // 2. Generate and Upload in one step to bypass the 1MB Upstash state limit
   const uploadedThumbnail = await context.run("generate-and-upload", async () => {
-    // Generate Image (Cast to any to allow manual type narrowing)
+    
+    // Use 'unknown' instead of 'any' to satisfy strict TS rules
     const result = await client.textToImage({
       model: "black-forest-labs/FLUX.1-schnell",
       inputs: prompt,
       parameters: { width: 1024, height: 576, num_inference_steps: 5 },
-    }) as any;
+    }) as unknown; 
 
     let imageBuffer: Buffer;
 
-    // Strict type checks for AI output
+    // Strict type checks for AI output now safely narrow the 'unknown' type
     if (result instanceof Blob) {
       const arrayBuffer = await result.arrayBuffer();
       imageBuffer = Buffer.from(arrayBuffer);
@@ -83,7 +84,7 @@ export const { POST } = serve(async (context) => {
     };
   });
 
-  // 3. Cleanup existing assets if they exist (preserving original project functionality)
+  // 3. Cleanup existing assets if they exist 
   await context.run("cleanup-thumbnail", async () => {
     if (video.thumbnailKey) {
       await utapi.deleteFiles(video.thumbnailKey);

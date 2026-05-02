@@ -1,10 +1,9 @@
 
-import { HomeVideosSection } from "../sections/home-videos-section";
 import { TrendingVideosSection } from "../sections/trending-videos-section";
 
-interface HomeViewProps {
-   categoryId?: string; 
-};
+// interface HomeViewProps {
+//    categoryId?: string; 
+// };
 
 export const TrendingView = () => {
     return (

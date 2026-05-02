@@ -6,7 +6,7 @@ import { SidebarGroup,
         SidebarMenuButton, 
         SidebarMenuItem} from "@/components/ui/sidebar";
 import { FlameIcon, HomeIcon, PlaySquareIcon } from "lucide-react";
-import { SignedIn, useAuth, useClerk } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -53,7 +53,7 @@ export const MainSection = () => {
                                     }
                                 }}
                             >
-                                <Link href={item.url} className="flex items-center gap-4">
+                                <Link prefetch  href={item.url} className="flex items-center gap-4">
                                     <item.icon />
                                     <span className="text-sm">{item.title}</span>
                                 </Link>

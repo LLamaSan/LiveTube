@@ -3,7 +3,6 @@ import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
-import { EventType } from 'svix/dist/api/event_type';
 import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request){

@@ -6,7 +6,7 @@ import {
     createSelectSchema,
     createUpdateSchema,  
 } from "drizzle-zod";
-import { UserSearch } from "lucide-react";
+import z from "zod";
 
 export const reactionType = pgEnum("reaction_type", ["like", "dislike"]);
 
@@ -146,7 +146,9 @@ export const videos = pgTable ("videos", {
 });
 
 export const videoInsertSchema = createInsertSchema(videos);
-export const videoUpdateSchema = createUpdateSchema(videos);
+export const videoUpdateSchema = createUpdateSchema(videos, {
+    visibility: z.enum(["public", "private"]),
+});
 export const videoSelectSchema = createSelectSchema(videos);
 
 export const videoRelations = relations(videos, ({ one, many }) => ({
